@@ -1,50 +1,27 @@
 const express = require('express');
 const app = express();
-const { MongoClient, ServerApiVersion } = require('mongodb');
-
 const cors = require('cors');
-const port = process.env.PORT || 5000;
-
+const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config()
+const port = process.env.PORT || 5000;
 
 // middleware
 app.use(cors());
 app.use(express.json());
 
-// data for test server
-// const users = [
-//     { id: 1, name: "Nagib Mahfuz", age: 33, married: true },
-//     { id: 2, name: "Adib Mahmud Ziad", age: 25, married: false },
-//     { id: 3, name: "Farhana Yeasmin Asha", age: 28, married: true }
-// ]
-
-app.get("/", (req, res) => {
-    res.send('Toy marketplace server is running');
-});
-
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ehpilc7.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-    serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-    }
-});
+const client = new MongoClient(uri, { serverApi: { version: ServerApiVersion.v1, strict: true, deprecationErrors: true, } });
 
-const run = () => {
+const run = async () => {
     try {
         // Connect the client to the server	(optional starting in v4.7)
         client.connect();
 
-        const userCollection = client.db('sample_mflix').collection('users');
+        const movies = client.db("usersDB").collection("users");
 
-        app.get('/users', async (req, res) => {
-            const result = await userCollection.find().toArray();
-            res.send(result);
-        });
+        app.get('/users', async (req, res) => { const result = await movies.find().toArray(); res.send(result); });
 
         // Send a ping to confirm a successful connection
         client.db("admin").command({ ping: 1 });
@@ -54,8 +31,7 @@ const run = () => {
         // await client.close();
     }
 }
-run()
+run().catch(console.dir);
 
-app.listen(port, () => {
-    console.log(`server is runnong on port: ${port}`);
-});
+app.get('/', (req, res) => { res.send('Nagib Toy Server is running') });
+app.listen(port, () => { console.log(`server is running in port: ${port}`) });
