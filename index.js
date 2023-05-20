@@ -1,11 +1,11 @@
 const express = require('express');
-const app = express();
 const cors = require('cors');
+require('dotenv').config();
 const { MongoClient, ServerApiVersion } = require('mongodb');
-require('dotenv').config()
-const port = process.env.PORT || 5000;
+const app = express();
 
-// middleware
+const port = process.env.PORT || 3000;
+
 app.use(cors());
 app.use(express.json());
 
@@ -19,9 +19,25 @@ const run = async () => {
         // Connect the client to the server	(optional starting in v4.7)
         client.connect();
 
-        const movies = client.db("usersDB").collection("users");
+        const legos = client.db("nagibLego").collection("legos");
 
-        app.get('/users', async (req, res) => { const result = await movies.find().toArray(); res.send(result); });
+        app.get('/legos', async (req, res) => {
+            const result = await legos.find().toArray();
+            res.send(result);
+        });
+
+        app.get('/legos_tab', async (req, res) => {
+            const query = {};
+            const options = { projection: { name: 1, price: 1, photo: 1, rating: 1, subCategory: 1 } };
+            const result = await legos.find(query, options).toArray();
+            res.send(result);
+        });
+
+        app.post('/legos', async (req, res) => {
+            const setLego = req.body;
+            const result = await legos.insertOne(setLego);
+            res.send(result);
+        });
 
         // Send a ping to confirm a successful connection
         client.db("admin").command({ ping: 1 });
@@ -33,5 +49,6 @@ const run = async () => {
 }
 run().catch(console.dir);
 
-app.get('/', (req, res) => { res.send('Nagib Toy Server is running') });
-app.listen(port, () => { console.log(`server is running in port: ${port}`) });
+app.get('/', (req, res) => { res.send('server is running') });
+
+app.listen(port, () => { console.log(`server is running on port: ${port}`); });
