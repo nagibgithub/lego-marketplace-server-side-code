@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 
 const port = process.env.PORT || 3000;
@@ -29,6 +29,22 @@ const run = async () => {
         app.get('/legos_tab', async (req, res) => {
             const query = {};
             const options = { projection: { name: 1, price: 1, photo: 1, rating: 1, subCategory: 1 } };
+            const result = await legos.find(query, options).toArray();
+            res.send(result);
+        });
+
+        app.get('/legos/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id);
+            const query = { _id: new ObjectId(id) };
+            const options = {};
+            const result = await legos.findOne(query, options);
+            res.send(result);
+        });
+
+        app.get('/all_legos', async (req, res) => {
+            const query = {};
+            const options = { projection: { sellerName:1, category:1, quantity:1, name: 1, price: 1, photo: 1, rating: 1, subCategory: 1 } };
             const result = await legos.find(query, options).toArray();
             res.send(result);
         });
