@@ -59,9 +59,7 @@ const run = async () => {
 
         app.post('/jwt', (req, res) => {
             const user = req.body;
-            console.log(user);
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
-            console.log(token);
             res.send({ token });
         });
 
@@ -71,10 +69,9 @@ const run = async () => {
             res.send(result);
         });
 
-        app.get('/services', async (req, res) => {
+        app.get('/searchLego', async (req, res) => {
             const sort = req.query.sort;
             const search = req.query.search;
-            console.log(search);
             const query = { name: { $regex: search, $options: 'i' } };
             const options = { sort: { "price": sort == "asc" ? 1 : -1 } };
             const cursor = legos.find(query, options);
