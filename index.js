@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
@@ -56,11 +57,49 @@ const run = async () => {
             res.send(result);
         });
 
+        app.post('/jwt', (req, res) => {
+            const user = req.body;
+            console.log(user);
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+            console.log(token);
+            res.send({ token });
+        });
+
         app.post('/legos', async (req, res) => {
             const setLego = req.body;
             const result = await legos.insertOne(setLego);
             res.send(result);
         });
+
+        app.get('/serarch_legos', async (req, res) => {
+            const sort = req.query.sort;
+            const search = req.query.search;
+            const query = { name: { $regex: search, $options: 'i' } }
+            const options = { sort: { "price": sort === 'asc' ? 1 : -1 } };
+            const cursor = legos.find(query, options);
+            const result = await cursor.toArray();
+            console.log(result);
+            res.send(result);
+        });
+
+        app.patch('/legos/:id', async (req, res) => {
+            const legoId = req.params.id;
+            const updatelegoData = req.body;
+            const filter = { _id: new ObjectId(legoId) };
+            const updateDoc = {
+                $set: {
+                    price: updatelegoData.price,
+                    quantity: updatelegoData.quantity,
+                    description: updatelegoData.description
+                },
+            };
+            const result = await legos.updateOne(filter, updateDoc);
+            res.send(result);
+        });
+
+
+
+
 
         // Send a ping to confirm a successful connection
         client.db("admin").command({ ping: 1 });
