@@ -71,14 +71,22 @@ const run = async () => {
             res.send(result);
         });
 
-        app.get('/serarch_legos', async (req, res) => {
+        app.get('/services', async (req, res) => {
             const sort = req.query.sort;
             const search = req.query.search;
-            const query = { name: { $regex: search, $options: 'i' } }
-            const options = { sort: { "price": sort === 'asc' ? 1 : -1 } };
+            console.log(search);
+            const query = { name: { $regex: search, $options: 'i' } };
+            const options = { sort: { "price": sort == "asc" ? 1 : -1 } };
             const cursor = legos.find(query, options);
             const result = await cursor.toArray();
-            console.log(result);
+            res.send(result);
+        });
+
+        app.get('/products', async (req, res) => {
+            const page = parseInt(req.query.page) || 0;
+            const limit = parseInt(req.query.limit) || 20;
+            const skip = page * limit;
+            const result = await legos.find().skip(skip).limit(limit).toArray();
             res.send(result);
         });
 
@@ -103,8 +111,6 @@ const run = async () => {
             const result = await legos.deleteOne(query);
             res.send(result);
         });
-
-
 
         // Send a ping to confirm a successful connection
         client.db("admin").command({ ping: 1 });
